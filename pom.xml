@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.kevinguanchedarias.taggable-cache</groupId>
     <artifactId>taggable-cache</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>Taggable Cache</name>
 
     <properties>
