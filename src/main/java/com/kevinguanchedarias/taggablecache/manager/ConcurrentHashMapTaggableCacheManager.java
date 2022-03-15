@@ -18,7 +18,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-public class ConcurrentHashMapTaggableCacheManager implements TaggableCacheManager {
+public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCacheManager {
     private final Map<String, Object> dataStore;
     private final Map<String, LocalDateTime> dataStoreTtl;
     private final Map<String, List<String>> tagsToCacheKeys;

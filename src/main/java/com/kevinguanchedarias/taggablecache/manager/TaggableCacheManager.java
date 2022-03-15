@@ -10,6 +10,8 @@ public interface TaggableCacheManager {
 
     void evictByCacheTag(String tag);
 
+    void evictByCacheTag(String tag, Object part);
+
     void saveEntry(String key, Object value, Collection<String> tags);
 
     void evictByKey(String key);

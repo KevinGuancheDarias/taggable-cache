@@ -117,6 +117,26 @@ class ConcurrentHashMapTaggableCacheManagerTest {
     }
 
     @Test
+    void evictByCacheTag_with_part_should_work() {
+        var computedTag = "user:8";
+        var tag = "user";
+        int tagPart = 8;
+        contentStore.put(TEST_KEY, TEST_VALUE);
+        concurrentHashMapTaggableCacheManager.evictByCacheTag(tag, tagPart);
+        assertThat(contentStore).containsKey(TEST_KEY);
+        List<String> list = new ArrayList<>();
+        list.add(TEST_KEY);
+        tagsToKeyMap.put(computedTag, list);
+
+        concurrentHashMapTaggableCacheManager.evictByCacheTag(tag, tagPart);
+
+        verify(lockMock, times(2)).lock();
+        verify(lockMock, times(2)).unlock();
+        assertThat(contentStore).doesNotContainKey(TEST_KEY);
+        assertThat(tagsToKeyMap.get(computedTag)).isEmpty();
+    }
+
+    @Test
     void saveEntry_should_throw_when_tried_to_add_and_existing_key() {
         contentStore.put(TEST_KEY, TEST_VALUE);
         List<String> list = List.of();
