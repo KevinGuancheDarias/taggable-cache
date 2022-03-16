@@ -6,22 +6,27 @@ import lombok.AllArgsConstructor;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Implementation for {@link TaggableCacheManager} using in memory hash maps
+ *
+ * @since 0.1.0
+ */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCacheManager {
     private final Map<String, Object> dataStore;
     private final Map<String, LocalDateTime> dataStoreTtl;
-    private final Map<String, List<String>> tagsToCacheKeys;
+    private final Map<String, Set<String>> tagsToCacheKeys;
     private final ScheduledExecutorService scheduledExecutorService;
     private final Lock lock;
     private final ConcurrentHashMapTaggableProperties concurrentHashMapTaggableProperties;
@@ -112,7 +117,7 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
         if (tagsToCacheKeys.containsKey(tag)) {
             tagsToCacheKeys.get(tag).add(cacheKey);
         } else {
-            List<String> list = new ArrayList<>();
+            Set<String> list = new HashSet<>();
             list.add(cacheKey);
             tagsToCacheKeys.put(tag, list);
         }

@@ -11,6 +11,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.List;
 import java.util.stream.IntStream;
 
+/**
+ * Resolves placeholders for key and tags using Spring Spel
+ *
+ * @since 0.1.0
+ */
 @AllArgsConstructor
 public class SpringSpelPlaceholderResolver implements PlaceholderResolver {
 

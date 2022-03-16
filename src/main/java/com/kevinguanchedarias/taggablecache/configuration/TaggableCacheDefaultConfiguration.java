@@ -12,6 +12,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+/**
+ * Default configuration can be used with @{@link org.springframework.context.annotation.Import} <br>
+ * Serves
+ *
+ * @since 0.1.0
+ */
 @Configuration
 @EnableAspectJAutoProxy
 @EnableConfigurationProperties(ConcurrentHashMapTaggableProperties.class)

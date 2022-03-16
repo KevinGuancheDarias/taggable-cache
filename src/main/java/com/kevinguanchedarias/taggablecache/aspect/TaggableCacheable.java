@@ -5,12 +5,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Caches the annotated method
+ *
+ * @since 0.1.0
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TaggableCacheable {
     /**
      * Tags to use SpelExpressions are supported <br>
      * Example: For method foo(user) a valid tag would be "user:#{user.id}"
+     *
+     * @since 0.1.0
      */
     String[] tags();
 

@@ -8,9 +8,9 @@
         <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.kevinguanchedarias.taggable-cache</groupId>
+    <groupId>com.github.KevinGuancheDarias</groupId>
     <artifactId>taggable-cache</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>v0.1.2-SNAPSHOT</version>
     <name>Taggable Cache</name>
 
     <properties>

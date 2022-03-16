@@ -7,10 +7,11 @@ import org.mockito.ArgumentCaptor;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -34,7 +35,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
     private ConcurrentHashMapTaggableCacheManager concurrentHashMapTaggableCacheManager;
     private Map<String, Object> contentStore;
     private Map<String, LocalDateTime> contentStoreTtl;
-    private Map<String, List<String>> tagsToKeyMap;
+    private Map<String, Set<String>> tagsToKeyMap;
     private ScheduledExecutorService scheduledExecutorServiceMock;
     private Lock lockMock;
 
@@ -59,7 +60,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
         contentStore.put(nonExpiredKey, 14);
         contentStoreTtl.put(expiredKey, LocalDateTime.now().minusHours(5));
         contentStoreTtl.put(nonExpiredKey, LocalDateTime.now().plusHours(5));
-        List<String> tagContent = new ArrayList<>(List.of(expiredKey, nonExpiredKey));
+        Set<String> tagContent = new HashSet<>(List.of(expiredKey, nonExpiredKey));
         tagsToKeyMap.put(TEST_TAG, tagContent);
 
         concurrentHashMapTaggableCacheManager.autoKeyWipe();
@@ -104,7 +105,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
         contentStore.put(TEST_KEY, TEST_VALUE);
         concurrentHashMapTaggableCacheManager.evictByCacheTag(TEST_TAG);
         assertThat(contentStore).containsKey(TEST_KEY);
-        List<String> list = new ArrayList<>();
+        Set<String> list = new HashSet<>();
         list.add(TEST_KEY);
         tagsToKeyMap.put(TEST_TAG, list);
 
@@ -124,7 +125,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
         contentStore.put(TEST_KEY, TEST_VALUE);
         concurrentHashMapTaggableCacheManager.evictByCacheTag(tag, tagPart);
         assertThat(contentStore).containsKey(TEST_KEY);
-        List<String> list = new ArrayList<>();
+        Set<String> list = new HashSet<>();
         list.add(TEST_KEY);
         tagsToKeyMap.put(computedTag, list);
 
@@ -162,7 +163,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
         assertThat(contentStoreTtl.get(TEST_KEY)).isAfter(LocalDateTime.now().plusHours(PROPERTIES_DEFINED_DURATION - 1));
         assertThat(tagsToKeyMap)
                 .containsKey(TEST_TAG)
-                .containsEntry(TEST_TAG, List.of(TEST_KEY, otherKey));
+                .containsEntry(TEST_TAG, Set.of(TEST_KEY, otherKey));
         verify(lockMock, times(2)).lock();
         verify(lockMock, times(2)).unlock();
     }
@@ -179,7 +180,7 @@ class ConcurrentHashMapTaggableCacheManagerTest {
         contentStore.put(TEST_KEY, TEST_VALUE);
         contentStore.put(TEST_KEY_2, TEST_VALUE_2);
         contentStoreTtl.put(TEST_KEY, LocalDateTime.now());
-        tagsToKeyMap.put(TEST_TAG, new ArrayList<>(List.of(TEST_KEY, TEST_KEY_2)));
+        tagsToKeyMap.put(TEST_TAG, new HashSet<>(List.of(TEST_KEY, TEST_KEY_2)));
 
         concurrentHashMapTaggableCacheManager.evictByKey(TEST_KEY);
 

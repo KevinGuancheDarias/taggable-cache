@@ -14,6 +14,11 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+/**
+ * Listens for {@link TaggableCacheable} annotations
+ *
+ * @since 0.1.0
+ */
 @Aspect
 @Component
 @AllArgsConstructor

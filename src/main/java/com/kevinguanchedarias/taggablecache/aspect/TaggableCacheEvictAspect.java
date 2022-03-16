@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Listens for {@link TaggableCacheEvictByTag} annd {@link TaggableCacheEvictByKey} annotations
+ *
+ * @since 0.1.0
+ */
 @Aspect
 @Component
 @AllArgsConstructor

@@ -15,6 +15,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+/**
+ * Placeholder implementation that replaces string within hash for its values<br>
+ * Example: given method argument foo with value "bar", for expression "Some:#foo" would resolve it as "Some:bar"
+ *
+ * @since 0.1.0
+ */
 public class DefaultPlaceholderResolver implements PlaceholderResolver {
     private final Pattern pattern = Pattern.compile("#[a-z0-9.]+", Pattern.CASE_INSENSITIVE);
 
