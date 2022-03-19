@@ -98,7 +98,7 @@ public class UserMassiveOperations {
 ## Create your own configuration
 Just see how the current works [TaggableCacheDefaultConfiguration](https://github.com/KevinGuancheDarias/taggable-cache/blob/v0.1.2/src/main/java/com/kevinguanchedarias/taggablecache/configuration/TaggableCacheDefaultConfiguration.java)
 
-You can switch the used annotation `PlaceholderResolver`, default is `DefaultPlaceholderResolver` (which translate using hash replacement) for example `"#user.id"` would be translate to `6`, to `SpringSpelPlaceholderResolver`, which would do the translation to `6` with `"\"user\" + #id"`
+You can switch the used annotation `PlaceholderResolver`, default is `DefaultPlaceholderResolver` (which translate using hash replacement) for example `"user:#id"` would be translate to `user:6`, for `SpringSpelPlaceholderResolver` this would do the same translation `"\"user:\" + #id"` ... While Spring one is way superior (supports method invocation, statics, and more) is not the default as most times the cache is going to be entity:id
 
 ## Future
 
