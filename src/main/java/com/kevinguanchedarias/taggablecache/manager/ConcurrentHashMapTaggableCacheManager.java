@@ -69,7 +69,7 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
         lock.lock();
         try {
             if (tagsToCacheKeys.containsKey(tag)) {
-                tagsToCacheKeys.get(tag).forEach(dataStore::remove);
+                tagsToCacheKeys.get(tag).forEach(this::deleteKey);
                 tagsToCacheKeys.get(tag).clear();
             }
         } finally {
@@ -100,8 +100,7 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
     @Override
     public void evictByKey(String key) {
         lock.lock();
-        dataStore.remove(key);
-        dataStoreTtl.remove(key);
+        deleteKey(key);
         lock.unlock();
         scheduledExecutorService.execute(() -> {
             lock.lock();
@@ -131,8 +130,7 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
                     .map(Map.Entry::getKey)
                     .toList()
                     .forEach(key -> {
-                        dataStore.remove(key);
-                        dataStoreTtl.remove(key);
+                        deleteKey(key);
                         wipeCacheKeyFromTagsStore(key);
                     });
         } finally {
@@ -144,5 +142,10 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
         tagsToCacheKeys.values().stream()
                 .filter(storedKeys -> storedKeys.contains(key))
                 .forEach(storedKeys -> storedKeys.remove(key));
+    }
+
+    private void deleteKey(String key) {
+        dataStore.remove(key);
+        dataStoreTtl.remove(key);
     }
 }
