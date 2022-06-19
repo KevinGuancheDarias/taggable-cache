@@ -3,6 +3,7 @@ package com.kevinguanchedarias.taggablecache.manager;
 import com.kevinguanchedarias.taggablecache.configuration.properties.ConcurrentHashMapTaggableProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 0.1.0
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Slf4j
 public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCacheManager {
     private final Map<String, Object> dataStore;
     private final Map<String, LocalDateTime> dataStoreTtl;
@@ -59,6 +61,18 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
     }
 
     @Override
+    public void clear() {
+        lock.lock();
+        try {
+            dataStore.clear();
+            dataStoreTtl.clear();
+            tagsToCacheKeys.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
     public Object findByKey(String key) {
         var storedValue = dataStore.get(key);
         return storedValue instanceof NullValue ? null : storedValue;
@@ -82,7 +96,8 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
         lock.lock();
         try {
             if (dataStore.containsKey(key)) {
-                throw new IllegalStateException("Tried to update a key that is already stored");
+                log.debug("Tried to update a key that is already stored... This may happen in overloaded systems" +
+                        ", or strongly async access to same key");
             }
             dataStore.put(key, value == null ?
                     new NullValue() {
@@ -93,6 +108,7 @@ public class ConcurrentHashMapTaggableCacheManager extends AbstractTaggableCache
             ));
             tags.forEach(tag -> addKeyToTagStore(key, tag));
         } finally {
+            log.trace("Releasing saveEntry lock for {}", key);
             lock.unlock();
         }
     }

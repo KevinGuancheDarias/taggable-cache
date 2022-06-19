@@ -53,4 +53,11 @@ public interface TaggableCacheManager {
      * @since 0.1.0
      */
     void evictByKey(String key);
+
+    /**
+     * Deletes all the cache
+     *
+     * @since 0.1.4
+     */
+    void clear();
 }

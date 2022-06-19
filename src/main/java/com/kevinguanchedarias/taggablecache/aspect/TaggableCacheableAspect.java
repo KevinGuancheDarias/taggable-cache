@@ -24,6 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class TaggableCacheableAspect {
+    private static final String KEY_PREFIX = "#className + \"_\" + #methodName";
 
     private final TaggableCacheManager taggableCacheManager;
     private final PlaceholderResolver placeholderResolver;
@@ -33,24 +34,31 @@ public class TaggableCacheableAspect {
         var annotation = AspectUtils.findAnnotation(joinPoint, TaggableCacheable.class);
         var tags = List.of(annotation.tags());
         var key = annotation.key();
-        if (!StringUtils.hasLength(key)) {
+        var keySuffix = annotation.keySuffix();
+        if (StringUtils.hasLength(key) && StringUtils.hasLength(keySuffix)) {
+            throw new IllegalArgumentException("Can't specify key and keySuffix together");
+        } else if (StringUtils.hasLength(keySuffix)) {
+            key = KEY_PREFIX + "+ \"_\" + " + keySuffix;
+        } else if (!StringUtils.hasLength(key) && !StringUtils.hasLength(keySuffix)) {
             key = generateDefaultKeyExpression((MethodSignature) joinPoint.getSignature());
         }
         var parsedKeyAndTags = placeholderResolver.resolveExpressions(joinPoint, key, tags);
 
-        if (taggableCacheManager.keyExists(parsedKeyAndTags.getKey())) {
-            log.debug("Cache HIT for key {}", parsedKeyAndTags.getKey());
-            return this.taggableCacheManager.findByKey(parsedKeyAndTags.getKey());
+        var parsedKey = parsedKeyAndTags.getKey();
+
+        if (taggableCacheManager.keyExists(parsedKey)) {
+            log.debug("Cache HIT for key {}", parsedKey);
+            return this.taggableCacheManager.findByKey(parsedKey);
         } else {
-            log.debug("Cache MISS for key {}", parsedKeyAndTags.getKey());
+            log.debug("Cache MISS for key {}", parsedKey);
             var executionResult = joinPoint.proceed();
-            taggableCacheManager.saveEntry(parsedKeyAndTags.getKey(), executionResult, parsedKeyAndTags.getTags());
+            taggableCacheManager.saveEntry(parsedKey, executionResult, parsedKeyAndTags.getTags());
             return executionResult;
         }
     }
 
     private String generateDefaultKeyExpression(MethodSignature methodSignature) {
-        var keyExpression = "#className + \"_\" + #methodName";
+        var keyExpression = KEY_PREFIX;
         var parameterNames = methodSignature.getParameterNames();
         if (parameterNames.length == 0) {
             return keyExpression;

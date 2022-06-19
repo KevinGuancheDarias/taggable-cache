@@ -29,4 +29,12 @@ public @interface TaggableCacheable {
      * @since 0.1.0
      */
     String key() default "";
+
+    /**
+     * If specified will be used as key suffix, can't be specified together with <i>key</i> <br>
+     * Use case: When you want to preserve the class_method key prefix, but use different logic with the method arguments for the key suffix
+     *
+     * @since 0.1.4
+     */
+    String keySuffix() default "";
 }

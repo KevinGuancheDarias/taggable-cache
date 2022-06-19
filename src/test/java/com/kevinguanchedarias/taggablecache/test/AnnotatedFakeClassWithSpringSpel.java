@@ -8,6 +8,7 @@ public class AnnotatedFakeClassWithSpringSpel {
     public static final String FAKE_PLAIN_TAG = "foo-tag";
     public static final String KNOWN_RETURN_VALUE = "theValue";
     public static final String FAKE_PLAIN_KEY = "theKey";
+    public static final String FAKE_PLAIN_SUFFIX = "#keySuffixArg";
     public static final String KEY_WITH_SPEL = "\"a_key:\" + #methodName";
     public static final String TAG_WITH_SPEL = "\"tagKey:\" + #tagValueArg";
 
@@ -25,6 +26,11 @@ public class AnnotatedFakeClassWithSpringSpel {
 
     @TaggableCacheable(key = FAKE_PLAIN_KEY, tags = FAKE_PLAIN_TAG)
     public String doSomethingWithPlainThings() {
+        return KNOWN_RETURN_VALUE;
+    }
+
+    @TaggableCacheable(keySuffix = FAKE_PLAIN_SUFFIX, tags = FAKE_PLAIN_TAG)
+    public String doSomethingWithKeySuffix(int keySuffixArg) {
         return KNOWN_RETURN_VALUE;
     }
 

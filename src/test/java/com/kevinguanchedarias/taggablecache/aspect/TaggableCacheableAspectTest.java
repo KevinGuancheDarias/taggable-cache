@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 class TaggableCacheableAspectTest {
     private static final String KNOWN_AUTO_GENERATED_KEY_1 = "class com.kevinguanchedarias.taggablecache.test.AnnotatedFakeClassWithSpringSpel_doSomethingWithDefaultKey";
     private static final String KNOWN_AUTO_GENERATED_KEY_2 = "class com.kevinguanchedarias.taggablecache.test.AnnotatedFakeClassWithSpringSpel_doSomethingWithDefaultKeyAndArgs_FooFirst_BarSecond";
+    private static final String KNOWN_AUTO_GENERATED_SUFFIXED_KEY = "class com.kevinguanchedarias.taggablecache.test.AnnotatedFakeClassWithSpringSpel_doSomethingWithKeySuffix_12";
     private static final String KNOWN_CACHED_VALUE = "IsCached";
     private static final String FIRST_ARG = "FooFirst";
     private static final String SECOND_ARG = "BarSecond";
@@ -97,6 +98,13 @@ class TaggableCacheableAspectTest {
         var result = annotatedFakeClassWithSpringSpel.doSomethingWithPlainThings();
 
         verify(taggableCacheManager, times(1)).keyExists(FAKE_PLAIN_KEY);
+        assertThat(result).isEqualTo(KNOWN_RETURN_VALUE);
+    }
+
+    @Test
+    void handleTaggableCacheAnnotation_should_use_key_with_suffix_and_plain_tag() {
+        var result = annotatedFakeClassWithSpringSpel.doSomethingWithKeySuffix(12);
+        verify(taggableCacheManager, times(1)).keyExists(KNOWN_AUTO_GENERATED_SUFFIXED_KEY);
         assertThat(result).isEqualTo(KNOWN_RETURN_VALUE);
     }
 

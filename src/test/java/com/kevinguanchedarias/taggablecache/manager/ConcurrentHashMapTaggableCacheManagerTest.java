@@ -3,7 +3,10 @@ package com.kevinguanchedarias.taggablecache.manager;
 import com.kevinguanchedarias.taggablecache.configuration.properties.ConcurrentHashMapTaggableProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -19,10 +22,13 @@ import java.util.concurrent.locks.Lock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(OutputCaptureExtension.class)
 class ConcurrentHashMapTaggableCacheManagerTest {
     private static final String TEST_KEY = "foo_key";
     private static final String TEST_VALUE = "the_val";
@@ -41,9 +47,9 @@ class ConcurrentHashMapTaggableCacheManagerTest {
 
     @BeforeEach
     void setup() {
-        contentStore = new HashMap<>();
-        contentStoreTtl = new HashMap<>();
-        tagsToKeyMap = new HashMap<>();
+        contentStore = spy(new HashMap<>());
+        contentStoreTtl = spy(new HashMap<>());
+        tagsToKeyMap = spy(new HashMap<>());
         scheduledExecutorServiceMock = mock(ScheduledExecutorService.class);
         lockMock = mock(Lock.class);
         ConcurrentHashMapTaggableProperties concurrentHashMapTaggableProperties = new ConcurrentHashMapTaggableProperties(PROPERTIES_DEFINED_DURATION, PROPERTIES_DEFINED_TIME_UNIT);
@@ -138,14 +144,15 @@ class ConcurrentHashMapTaggableCacheManagerTest {
     }
 
     @Test
-    void saveEntry_should_throw_when_tried_to_add_and_existing_key() {
+    void saveEntry_should_log_when_tried_to_add_and_existing_key(CapturedOutput capturedOutput) {
         contentStore.put(TEST_KEY, TEST_VALUE);
         List<String> list = List.of();
 
-        assertThatThrownBy(() -> concurrentHashMapTaggableCacheManager.saveEntry(TEST_KEY, TEST_VALUE, list))
-                .isInstanceOf(IllegalStateException.class);
+        concurrentHashMapTaggableCacheManager.saveEntry(TEST_KEY, TEST_VALUE, list);
+
         verify(lockMock, times(1)).lock();
         verify(lockMock, times(1)).unlock();
+        assertThat(capturedOutput.getOut()).contains("Tried to update a key that is already stored");
     }
 
     @Test
@@ -200,6 +207,27 @@ class ConcurrentHashMapTaggableCacheManagerTest {
                 .contains(TEST_KEY_2);
         verify(lockMock, times(2)).lock();
         verify(lockMock, times(2)).unlock();
+    }
+
+    @Test
+    void clear_should_work() {
+        concurrentHashMapTaggableCacheManager.clear();
+
+        verify(lockMock, times(1)).lock();
+        verify(contentStore, times(1)).clear();
+        verify(contentStoreTtl, times(1)).clear();
+        verify(tagsToKeyMap, times(1)).clear();
+        verify(lockMock, times(1)).unlock();
+    }
+
+    @Test
+    void clear_should_unlock_even_on_exception() {
+        doThrow(new IllegalStateException()).when(tagsToKeyMap).clear();
+
+        assertThatThrownBy(() -> concurrentHashMapTaggableCacheManager.clear())
+                .isInstanceOf(IllegalStateException.class);
+
+        verify(lockMock, times(1)).unlock();
     }
 
 }
