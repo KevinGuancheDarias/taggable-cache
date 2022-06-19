@@ -20,7 +20,7 @@ First of all add to your pom the dependency
     <dependency>
         <groupId>com.github.KevinGuancheDarias</groupId>
         <artifactId>taggable-cache</artifactId>
-        <version>v0.1.2</version>
+        <version>v0.1.4</version>
     </dependency>
 </dependencies>
 ```
