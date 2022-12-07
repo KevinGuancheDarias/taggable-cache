@@ -1,6 +1,8 @@
 package com.kevinguanchedarias.taggablecache.manager;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Interface that provides the contract that Taggable Cache managers must follow
@@ -20,7 +22,7 @@ public interface TaggableCacheManager {
      * @return specified key or null if none
      * @since 0.1.0
      */
-    Object findByKey(String key);
+    <T> T findByKey(String key);
 
     /**
      * Evict all keys that have the specified tag
@@ -53,6 +55,8 @@ public interface TaggableCacheManager {
      * @since 0.1.0
      */
     void evictByKey(String key);
+
+    <T> T computeIfAbsent(String key, List<String> tags, Supplier<T> computeSupplier);
 
     /**
      * Deletes all the cache

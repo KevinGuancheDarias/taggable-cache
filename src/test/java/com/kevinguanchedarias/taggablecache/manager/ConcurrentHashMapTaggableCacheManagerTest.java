@@ -5,28 +5,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(OutputCaptureExtension.class)
 class ConcurrentHashMapTaggableCacheManagerTest {
@@ -144,18 +137,6 @@ class ConcurrentHashMapTaggableCacheManagerTest {
     }
 
     @Test
-    void saveEntry_should_log_when_tried_to_add_and_existing_key(CapturedOutput capturedOutput) {
-        contentStore.put(TEST_KEY, TEST_VALUE);
-        List<String> list = List.of();
-
-        concurrentHashMapTaggableCacheManager.saveEntry(TEST_KEY, TEST_VALUE, list);
-
-        verify(lockMock, times(1)).lock();
-        verify(lockMock, times(1)).unlock();
-        assertThat(capturedOutput.getOut()).contains("Tried to update a key that is already stored");
-    }
-
-    @Test
     void saveEntry_should_work() {
         var otherKey = "other_key";
 
@@ -228,6 +209,33 @@ class ConcurrentHashMapTaggableCacheManagerTest {
                 .isInstanceOf(IllegalStateException.class);
 
         verify(lockMock, times(1)).unlock();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void computeIfAbsent_should_run_supplier_on_absent() {
+        var supplierRetVal = "foo";
+        Supplier<String> supplier = mock(Supplier.class);
+        given(supplier.get()).willReturn(supplierRetVal);
+
+        var retVal = concurrentHashMapTaggableCacheManager.computeIfAbsent(TEST_KEY, List.of(TEST_VALUE), supplier);
+
+        verify(supplier, times(1)).get();
+        assertThat(retVal).isEqualTo(supplierRetVal);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void computeIfAbsent_should_skip_supplier_and_return_cached_value() {
+        contentStore.put(TEST_KEY, TEST_VALUE);
+        Supplier<String> supplier = mock(Supplier.class);
+
+        var retVal = concurrentHashMapTaggableCacheManager.computeIfAbsent(TEST_KEY, List.of(TEST_VALUE), supplier);
+
+        verify(supplier, never()).get();
+        assertThat(retVal).isEqualTo(TEST_VALUE);
+
     }
 
 }
