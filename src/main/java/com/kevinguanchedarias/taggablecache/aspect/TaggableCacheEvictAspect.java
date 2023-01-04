@@ -5,8 +5,8 @@ import com.kevinguanchedarias.taggablecache.placeholderresolver.PlaceholderResol
 import com.kevinguanchedarias.taggablecache.util.AspectUtils;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,13 +24,13 @@ public class TaggableCacheEvictAspect {
     private final TaggableCacheManager taggableCacheManager;
     private final PlaceholderResolver placeholderResolver;
 
-    @AfterReturning("@annotation(com.kevinguanchedarias.taggablecache.aspect.TaggableCacheEvictByKey)")
+    @Before("@annotation(com.kevinguanchedarias.taggablecache.aspect.TaggableCacheEvictByKey)")
     void evictByKey(JoinPoint joinPoint) {
         var annotation = AspectUtils.findAnnotation(joinPoint, TaggableCacheEvictByKey.class);
         taggableCacheManager.evictByKey(placeholderResolver.resolveExpressions(joinPoint, annotation.key(), List.of()).getKey());
     }
 
-    @AfterReturning("@annotation(com.kevinguanchedarias.taggablecache.aspect.TaggableCacheEvictByTag)")
+    @Before("@annotation(com.kevinguanchedarias.taggablecache.aspect.TaggableCacheEvictByTag)")
     void evictByTags(JoinPoint joinPoint) {
         var annotation = AspectUtils.findAnnotation(joinPoint, TaggableCacheEvictByTag.class);
         var tags = List.of(annotation.tags());
